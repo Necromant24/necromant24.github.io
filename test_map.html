@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+    <style>
+
+        #map{
+            width: 100%;
+            height: 250px;
+            border: none;
+        }
+
+    </style>
+
+</head>
+<body>
+<div>
+
+    <iframe id="map" src=""></iframe>
+
+</div>
+</body>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=c560b4b6-0b53-4be5-9b09-5df6cbd4ecbc&lang=ru_RU" type="text/javascript">
+</script>
+<script>
+
+    const ymap_frame_src = window.location.origin + '/neuro_designer/public/ymap_snippet.html#interactive'
+
+    const map = document.getElementById('map');
+
+    map.src = ymap_frame_src;
+
+    if(window.navigator.geolocation){
+        console.log('available');
+        window.navigator.geolocation.getCurrentPosition(console.log,console.log);
+    }else{
+        console.log('unavailable');
+    }
+
+
+    const SetGeoPoint = (point) => {
+        let map_frame = document.getElementById('map_frame')
+        let coordinatesStr = JSON.stringify(point)
+        map_frame.contentWindow.postMessage('{"coordinates": ' + coordinatesStr + '}', "*")
+
+    }
+
+
+    window.addEventListener("message", (e) => {
+        console.log("window message");
+        console.log(e);
+
+        let addressArr = e.data.split(',');
+
+        let address = {
+            country: '',
+            city: '',
+            street: '',
+            house: ''
+        }
+
+        console.log(addressArr);
+
+        [address.country, address.city, address.street, address.house] = addressArr;
+
+        console.log(address);
+
+
+    });
+
+
+</script>
+</html>

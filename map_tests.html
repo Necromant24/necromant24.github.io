@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>neuro-markets map</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+    <meta name="viewport" content="width=device-width,initial-scale=1.0">
+
+    <style>
+
+        #map{
+            width: 600px;
+            height: 400px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+<div>
+    <div id="map" ></div>
+</div>
+
+</body>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=c560b4b6-0b53-4be5-9b09-5df6cbd4ecbc&lang=ru_RU"
+        type="text/javascript">
+</script>
+<script type="text/javascript">
+
+    let testCoordinates = [59.93, 30.3];
+    let myMap;
+
+    ymaps.ready(init);
+
+    async function init() {
+        myMap = new ymaps.Map("map", {
+            center: testCoordinates,
+            zoom: 11
+        });
+
+        let geocode = ymaps.geocode(testCoordinates);
+
+        geocode.then((res)=>{
+            console.log('success');
+            let place = res.geoObjects.get(0);
+            console.log(place.properties.get("text"));
+            console.log(place);
+        }, (err)=>{
+            console.log(err);
+        });
+
+
+        let myPlacemark = new ymaps.Placemark(testCoordinates);
+
+        myMap.geoObjects.add(myPlacemark);
+
+    }
+
+
+
+
+
+</script>
+</html>

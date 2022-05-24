@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+    <title>neuro-markets map</title>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+
+    <style>
+
+        #map{
+            width: 100%;
+            height: 240px;
+        }
+
+    </style>
+
+</head>
+
+<body>
+<div>
+    <div id="map" ></div>
+    <div id="log">nothing</div>
+</div>
+
+</body>
+<script src="https://api-maps.yandex.ru/2.1/?apikey=c560b4b6-0b53-4be5-9b09-5df6cbd4ecbc&lang=ru_RU"
+        type="text/javascript">
+</script>
+<script type="text/javascript">
+
+    let myMap;
+    let log;
+    let previousPlacemark = null;
+
+    ymaps.ready(init);
+
+    function init() {
+        myMap = new ymaps.Map("map", {
+            center: [59.9, 30.3],
+            zoom: 11
+        });
+
+
+        log = document.getElementById('log');
+
+
+        // var myPlacemark = new ymaps.GeoObject({
+        //     geometry: {
+        //         type: "Point",
+        //         coordinates: [55.76, 37.56]
+        //     }
+        // });
+        //
+        let myPlacemark = new ymaps.Placemark([59.9, 30.3]);
+
+        myMap.geoObjects.add(myPlacemark);
+
+        previousPlacemark = myPlacemark;
+
+        //myMap.setCenter([10,10]);
+
+        log.innerText = window.location.hash;
+
+        if (window.location.hash === "#interactive") {
+
+            if (window.navigator.geolocation) {
+                console.log('available');
+
+
+                const successPos = (geoLocation) => {
+
+                    console.log('success');
+                    let coords = [geoLocation.coords.latitude, geoLocation.coords.longitude];
+                    console.log(coords);
+                    let curentPositionMark = new ymaps.Placemark(coords);
+                    myMap.geoObjects.add(curentPositionMark);
+                    myMap.setCenter(coords);
+                    myMap.geoObjects.remove(previousPlacemark);
+                    previousPlacemark = curentPositionMark;
+
+                }
+
+                // get error
+                //window.navigator.geolocation.getCurrentPosition(successPos,console.log);
+                // latitude: 59.9212, longitude: 30.2929
+
+
+                // works
+                window.navigator.geolocation.getCurrentPosition(successPos, console.log);
+
+
+            } else {
+                console.log('unavailable');
+            }
+
+
+            myMap.events.add('click', function (e) {
+
+                let coords = e.get('coords');
+
+                let userPlacemark = new ymaps.Placemark(coords);
+
+                if (previousPlacemark !== null) {
+                    myMap.geoObjects.remove(previousPlacemark);
+                }
+
+                myMap.geoObjects.add(userPlacemark);
+                previousPlacemark = userPlacemark;
+
+                let geocode = ymaps.geocode(coords);
+
+                geocode.then((res)=>{
+                    console.log('success');
+                    let place = res.geoObjects.get(0);
+                    console.log(place.properties.get("text"));
+                    console.log(place);
+
+                    window.parent.postMessage(place.properties.get("text"), "*");
+
+
+                }, (err)=>{
+                    console.log(err);
+                });
+
+            });
+        }
+
+
+    }
+
+
+    window.addEventListener("message", (e) => {
+
+        let data = JSON.parse(e.data);
+        console.log(data);
+
+        myMap.setCenter(data.coordinates);
+        myMap.setZoom(13);
+        let myPlacemark = new ymaps.Placemark(data.coordinates);
+        myMap.geoObjects.add(myPlacemark);
+
+    }, false);
+
+
+
+</script>
+</html>
